@@ -1,0 +1,3561 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "This is the first version of the 3rd Party Integration API specification for Ticketmaster Partners. Through this, the Partners can export their contents to the Ticketmaster ticketing platform in order to sell their inventories through the sales channels enabled.",
+    "version" : "0.14.1",
+    "title" : "TM 3rd Party Integration API",
+    "termsOfService" : "http://tm-3pi-api.ticketmaster.com/terms/",
+    "contact" : {
+      "email" : "3pi-team@ticketmaster.es"
+    },
+    "license" : {
+      "name" : "Ticketmaster",
+      "url" : "http://www.ticketmaster.com/licenses/eib-api_license-1.0.html"
+    }
+  },
+  "host" : "partner.com",
+  "basePath" : "/tm-3pi-api/v1",
+  "tags" : [ {
+    "name" : "event",
+    "description" : "A public entertainment pending to take place"
+  }, {
+    "name" : "manifest",
+    "description" : "A seat configuration associated to an event"
+  }, {
+    "name" : "booking",
+    "description" : "An amount of tickets reserved in order to buy them"
+  }, {
+    "name" : "order",
+    "description" : "An amount of tickets purchased"
+  } ],
+  "schemes" : [ "https" ],
+  "paths" : {
+    "/healthcheck" : {
+      "get" : {
+        "summary" : "Health Check Request",
+        "description" : "Testing for the reachability of a Partner system and retrieve notifications",
+        "operationId" : "HealthCheck",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/HealthCheckResponse"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized (the request has not been applied because it lacks valid authentication credentials)"
+          },
+          "403" : {
+            "description" : "Forbidden (resource cannot be accessed)"
+          },
+          "500" : {
+            "description" : "Internal error"
+          }
+        },
+        "security" : [ {
+          "3p_auth" : [ "check:3p-system" ]
+        } ]
+      }
+    },
+    "/events" : {
+      "get" : {
+        "tags" : [ "event" ],
+        "summary" : "Retrieves a list of events",
+        "description" : "Get an event list from the Partner system",
+        "operationId" : "EventListRequest",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "venue",
+          "in" : "query",
+          "description" : "Venue where the event take place",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "last_modification",
+          "in" : "query",
+          "description" : "Minimum last modification (UTC date and time)",
+          "required" : true,
+          "type" : "string",
+          "format" : "date-time"
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "description" : "Page size of the response",
+          "required" : false,
+          "type" : "integer",
+          "default" : 20,
+          "minimum" : 1
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "description" : "Page number",
+          "required" : false,
+          "type" : "integer",
+          "default" : 0,
+          "minimum" : 0
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "Sorting order of the search result.  Allowable values - \"NAME,DATE\" or \"DATE,NAME\"",
+          "required" : false,
+          "type" : "string",
+          "default" : "DATE,NAME",
+          "enum" : [ "NAME,DATE", "DATE,NAME" ]
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/EventInfoList"
+            }
+          },
+          "400" : {
+            "description" : "Bad request (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized (the request has not been applied because it lacks valid authentication credentials)"
+          },
+          "403" : {
+            "description" : "Forbidden (resource cannot be accessed)"
+          },
+          "410" : {
+            "description" : "Unsuccessful operation (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "500" : {
+            "description" : "Internal error"
+          }
+        },
+        "security" : [ {
+          "3p_auth" : [ "ingestion:3p-system" ]
+        } ]
+      }
+    },
+    "/events/{event_id}" : {
+      "get" : {
+        "tags" : [ "event" ],
+        "summary" : "Retrieves a specific event.",
+        "description" : "Get an event from the Partner system",
+        "operationId" : "EventRequest",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "Event identifier",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "last_modification",
+          "in" : "query",
+          "description" : "Minimum last modification (UTC date and time)",
+          "required" : true,
+          "type" : "string",
+          "format" : "date-time"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/EventInfo"
+            }
+          },
+          "400" : {
+            "description" : "Bad request (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized (the request has not been applied because it lacks valid authentication credentials)"
+          },
+          "403" : {
+            "description" : "Forbidden (resource cannot be accessed)"
+          },
+          "404" : {
+            "description" : "Not found (the event has not been found)"
+          },
+          "410" : {
+            "description" : "Unsuccessful operation (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "500" : {
+            "description" : "Internal error"
+          }
+        },
+        "security" : [ {
+          "3p_auth" : [ "ingestion:3p-system" ]
+        } ]
+      }
+    },
+    "/events/{event_id}/availability" : {
+      "get" : {
+        "tags" : [ "event" ],
+        "summary" : "Retrieves the availability of an event.",
+        "description" : "Get the event availability from the Partner system.",
+        "operationId" : "EventAvailabilityRequest",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "Event identifier",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "last_modification",
+          "in" : "query",
+          "description" : "UTC date and time of the event last modification",
+          "required" : true,
+          "type" : "string",
+          "format" : "date-time"
+        }, {
+          "name" : "level",
+          "in" : "query",
+          "description" : "Level identifier or 'ALL'",
+          "required" : false,
+          "type" : "string",
+          "default" : "ALL"
+        }, {
+          "name" : "section",
+          "in" : "query",
+          "description" : "Section identifier or 'ALL'",
+          "required" : false,
+          "type" : "string",
+          "default" : "ALL"
+        }, {
+          "name" : "avail_level",
+          "in" : "query",
+          "description" : "Level of information detail\n\"OVERVIEW\" retrieves only quantities object (no rows)\n\"DETAIL\" retrieves quantities and rows objects \n",
+          "required" : false,
+          "type" : "string",
+          "default" : "OVERVIEW",
+          "enum" : [ "OVERVIEW", "DETAIL" ]
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/EventAvailability"
+            }
+          },
+          "400" : {
+            "description" : "Bad request (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized (the request has not been applied because it lacks valid authentication credentials)"
+          },
+          "403" : {
+            "description" : "Forbidden (resource cannot be accessed)"
+          },
+          "404" : {
+            "description" : "Not found (the event has not been found)"
+          },
+          "409" : {
+            "description" : "Conflict (invalid last_modification)"
+          },
+          "410" : {
+            "description" : "Unsuccessful operation (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "500" : {
+            "description" : "Internal error"
+          }
+        },
+        "security" : [ {
+          "3p_auth" : [ "ingestion:3p-system" ]
+        } ]
+      }
+    },
+    "/manifests/{manifest_id}" : {
+      "get" : {
+        "tags" : [ "manifest" ],
+        "summary" : "Retrieves a specific manifest.",
+        "description" : "Get a manifest from the Partner system",
+        "operationId" : "ManifestRequest",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "manifest_id",
+          "in" : "path",
+          "description" : "Manifest identifier",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/Manifest"
+            }
+          },
+          "400" : {
+            "description" : "Bad request (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized (the request has not been applied because it lacks valid authentication credentials)"
+          },
+          "403" : {
+            "description" : "Forbidden (resource cannot be accessed)"
+          },
+          "404" : {
+            "description" : "Not found (the manifest has not been found)"
+          },
+          "410" : {
+            "description" : "Unsuccessful operation (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "500" : {
+            "description" : "Internal error"
+          }
+        },
+        "security" : [ {
+          "3p_auth" : [ "ingestion:3p-system" ]
+        } ]
+      }
+    },
+    "/bookings" : {
+      "post" : {
+        "tags" : [ "booking" ],
+        "summary" : "Inventory Request",
+        "description" : "Create a reservation in the Partner ticketing system",
+        "operationId" : "InventoryRequest",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "request",
+          "description" : "Information to create a reservation",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/InventoryRequest"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful opertaion (it has been processed but reservation not created).",
+            "schema" : {
+              "$ref" : "#/definitions/InventoryResponse"
+            }
+          },
+          "201" : {
+            "description" : "Successful operation (the reservation has been successfully created).",
+            "schema" : {
+              "$ref" : "#/definitions/InventoryResponse"
+            }
+          },
+          "400" : {
+            "description" : "Bad request (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized (the request has not been applied because it lacks valid authentication credentials)"
+          },
+          "403" : {
+            "description" : "Forbidden (resource cannot be accessed)"
+          },
+          "409" : {
+            "description" : "Conflict (invalid last_modification)"
+          },
+          "410" : {
+            "description" : "Unsuccessful operation (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "500" : {
+            "description" : "Internal error"
+          }
+        },
+        "security" : [ {
+          "3p_auth" : [ "runtime:3p-system" ]
+        } ]
+      }
+    },
+    "/bookings/{inventory_token}" : {
+      "delete" : {
+        "tags" : [ "booking" ],
+        "summary" : "Inventory Release",
+        "description" : "Release a reservation in the Partner system",
+        "operationId" : "InventoryRelease",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "inventory_token",
+          "in" : "path",
+          "description" : "Token of reservation",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Successful operation (the reservation has been successfully released)."
+          },
+          "400" : {
+            "description" : "Bad request (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized (the request has not been applied because it lacks valid authentication credentials)"
+          },
+          "403" : {
+            "description" : "Forbidden (resource cannot be accessed)"
+          },
+          "404" : {
+            "description" : "Not found (the reservation has not been found)"
+          },
+          "410" : {
+            "description" : "Unsuccessful operation (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "500" : {
+            "description" : "Internal error"
+          }
+        },
+        "security" : [ {
+          "3p_auth" : [ "runtime:3p-system" ]
+        } ]
+      }
+    },
+    "/orders" : {
+      "get" : {
+        "tags" : [ "order" ],
+        "summary" : "Retrieves an Order list",
+        "description" : "Get an list of order information from the Partner system",
+        "operationId" : "OrderResponseList",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "inventory_token",
+          "in" : "query",
+          "description" : "Token of reservation",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "event_id",
+          "in" : "query",
+          "description" : "Event identifier",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "start_date_time",
+          "in" : "query",
+          "description" : "UTC date and time of first order",
+          "required" : false,
+          "type" : "string",
+          "format" : "date-time"
+        }, {
+          "name" : "end_date_time",
+          "in" : "query",
+          "description" : "UTC date and time of last order",
+          "required" : false,
+          "type" : "string",
+          "format" : "date-time"
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "description" : "Page size of the response",
+          "required" : false,
+          "type" : "integer",
+          "default" : 20,
+          "minimum" : 1
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "description" : "Page number",
+          "required" : false,
+          "type" : "integer",
+          "default" : 0,
+          "minimum" : 0
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/OrderResponseList"
+            }
+          },
+          "400" : {
+            "description" : "Bad request (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized (the request has not been applied because it lacks valid authentication credentials)"
+          },
+          "403" : {
+            "description" : "Forbidden (resource cannot be accessed)"
+          },
+          "410" : {
+            "description" : "Unsuccessful operation (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "500" : {
+            "description" : "Internal error"
+          }
+        },
+        "security" : [ {
+          "3p_auth" : [ "runtime:3p-system" ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "order" ],
+        "summary" : "Order Request (Inventory Commit)",
+        "description" : "Create an order in the Partner ticketing system",
+        "operationId" : "OrderRequest",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "request",
+          "description" : "Information to create an order",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/OrderRequest"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation (it has been processed but order not created).",
+            "schema" : {
+              "$ref" : "#/definitions/OrderResponse"
+            }
+          },
+          "201" : {
+            "description" : "Successful operation (the order has been successfully created).",
+            "schema" : {
+              "$ref" : "#/definitions/OrderResponse"
+            }
+          },
+          "400" : {
+            "description" : "Bad request (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized (the request has not been applied because it lacks valid authentication credentials)"
+          },
+          "403" : {
+            "description" : "Forbidden (resource cannot be accessed)"
+          },
+          "410" : {
+            "description" : "Unsuccessful operation (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "500" : {
+            "description" : "Internal error"
+          }
+        },
+        "security" : [ {
+          "3p_auth" : [ "runtime:3p-system" ]
+        } ]
+      }
+    },
+    "/orders/{inventory_order}" : {
+      "get" : {
+        "tags" : [ "order" ],
+        "summary" : "Order Status",
+        "description" : "Get the order status from the Partner system",
+        "operationId" : "OrderStatus",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "inventory_order",
+          "in" : "path",
+          "description" : "Order reference",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/OrderStatus"
+            }
+          },
+          "400" : {
+            "description" : "Bad request (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized (the request has not been applied because it lacks valid authentication credentials)"
+          },
+          "403" : {
+            "description" : "Forbidden (resource cannot be accessed)"
+          },
+          "404" : {
+            "description" : "Not found (the order reference has not been found)"
+          },
+          "410" : {
+            "description" : "Unsuccessful operation (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "500" : {
+            "description" : "Internal error"
+          }
+        },
+        "security" : [ {
+          "3p_auth" : [ "runtime:3p-system" ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "order" ],
+        "summary" : "Order Print, Order Print Rollback or Order Cancel",
+        "description" : "Update an order to print, to rollback the print or to cancel",
+        "operationId" : "OrderUpdate",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "inventory_order",
+          "in" : "path",
+          "description" : "Order reference",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "request",
+          "description" : "Information to update an order",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/OrderUpdateRequest"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful operation (the action has been processed but not modified).",
+            "schema" : {
+              "$ref" : "#/definitions/OrderUpdateResponse"
+            }
+          },
+          "201" : {
+            "description" : "Successful operation (the action has been successfully e).",
+            "schema" : {
+              "$ref" : "#/definitions/OrderUpdateResponse"
+            }
+          },
+          "400" : {
+            "description" : "Bad request (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized (the request has not been applied because it lacks valid authentication credentials)"
+          },
+          "403" : {
+            "description" : "Forbidden (resource cannot be accessed)"
+          },
+          "404" : {
+            "description" : "Not found (the order reference has not been found)"
+          },
+          "410" : {
+            "description" : "Unsuccessful operation (error description in response body)",
+            "schema" : {
+              "$ref" : "#/definitions/StatusResponse"
+            }
+          },
+          "500" : {
+            "description" : "Internal error"
+          }
+        },
+        "security" : [ {
+          "3p_auth" : [ "runtime:3p-system" ]
+        } ]
+      }
+    }
+  },
+  "securityDefinitions" : {
+    "3p_auth" : {
+      "type" : "oauth2",
+      "tokenUrl" : "http://partner.com/tm-3pi-api/login",
+      "flow" : "application",
+      "scopes" : {
+        "check:3p-system" : "TM can check the Partner system",
+        "ingestion:3p-system" : "TM can manage manifests & events from the Partner system",
+        "runtime:3p-system" : "TM can manage bookings & orders to the Partner system"
+      }
+    }
+  },
+  "definitions" : {
+    "HealthCheckResponse" : {
+      "type" : "object",
+      "required" : [ "id", "message" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "0 - Successful\n901 - Service not currently available\n902 - Syncronization required\n"
+        },
+        "message" : {
+          "type" : "string"
+        },
+        "venues_to_sync" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        }
+      },
+      "example" : {
+        "venues_to_sync" : [ "venues_to_sync", "venues_to_sync" ],
+        "id" : 0,
+        "message" : "message"
+      }
+    },
+    "TextInfo" : {
+      "type" : "object",
+      "required" : [ "description", "lang", "name" ],
+      "properties" : {
+        "lang" : {
+          "type" : "string",
+          "format" : "^[a-z]{2}-[a-z]{2}$",
+          "description" : "ISO language and country codes (Example \"es-es\")."
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "Event name or title",
+          "maxLength" : 70
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "Event description",
+          "maxLength" : 15000000
+        }
+      },
+      "example" : {
+        "name" : "name",
+        "description" : "description",
+        "lang" : "lang"
+      }
+    },
+    "TextInfoPriceLevel" : {
+      "type" : "object",
+      "required" : [ "description", "lang", "name" ],
+      "properties" : {
+        "lang" : {
+          "type" : "string",
+          "format" : "^[a-z]{2}-[a-z]{2}$",
+          "description" : "ISO language and country codes (Example \"es-es\")."
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "Event name or title",
+          "maxLength" : 6
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "Event description",
+          "maxLength" : 64
+        }
+      },
+      "example" : {
+        "name" : "name",
+        "description" : "description",
+        "lang" : "lang"
+      }
+    },
+    "TextInfoPriceType" : {
+      "type" : "object",
+      "required" : [ "description", "lang", "name" ],
+      "properties" : {
+        "lang" : {
+          "type" : "string",
+          "format" : "^[a-z]{2}-[a-z]{2}$",
+          "description" : "ISO language and country codes (Example \"es-es\")."
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "Price type name or title",
+          "maxLength" : 20
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "Price type description",
+          "maxLength" : 64
+        },
+        "additional_info" : {
+          "type" : "string",
+          "description" : "Price type additional info",
+          "maxLength" : 500
+        },
+        "printed_description" : {
+          "type" : "string",
+          "description" : "Price type printed description",
+          "maxLength" : 64
+        }
+      },
+      "example" : {
+        "additional_info" : "additional_info",
+        "name" : "name",
+        "description" : "description",
+        "lang" : "lang",
+        "printed_description" : "printed_description"
+      }
+    },
+    "Event" : {
+      "type" : "object",
+      "required" : [ "event_id", "face_value_prices", "genre_info", "last_modification", "manifest_id", "organization_info", "price_levels", "price_types", "text_infos" ],
+      "properties" : {
+        "event_id" : {
+          "type" : "string",
+          "description" : "Event identifier",
+          "maxLength" : 45
+        },
+        "last_modification" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "UTC date and time of the event last modification"
+        },
+        "organization_info" : {
+          "$ref" : "#/definitions/Event_organization_info"
+        },
+        "manifest_id" : {
+          "type" : "string",
+          "description" : "Manifest identifier",
+          "maxLength" : 45
+        },
+        "text_infos" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/TextInfo"
+          },
+          "minItems" : 1
+        },
+        "maximum_tickets_quantity" : {
+          "type" : "integer",
+          "description" : "Global maximum number of tickets",
+          "minimum" : 1
+        },
+        "genre_info" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Event_genre_info"
+          },
+          "maxItems" : 2,
+          "minItems" : 1
+        },
+        "date_time" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "Event UTC date and time"
+        },
+        "date_time_properties" : {
+          "$ref" : "#/definitions/Event_date_time_properties"
+        },
+        "visibility" : {
+          "$ref" : "#/definitions/Event_visibility"
+        },
+        "doors_date_time" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "Doors UTC date time"
+        },
+        "doors_date_time_properties" : {
+          "$ref" : "#/definitions/Event_doors_date_time_properties"
+        },
+        "price_levels" : {
+          "type" : "array",
+          "description" : "list of price categories",
+          "items" : {
+            "$ref" : "#/definitions/Event_price_levels"
+          },
+          "minItems" : 1
+        },
+        "price_types" : {
+          "type" : "array",
+          "description" : "list of price types",
+          "items" : {
+            "$ref" : "#/definitions/Event_price_types"
+          },
+          "minItems" : 1
+        },
+        "face_value_prices" : {
+          "type" : "array",
+          "description" : "list of prices",
+          "items" : {
+            "$ref" : "#/definitions/Event_face_value_prices"
+          },
+          "minItems" : 1
+        }
+      },
+      "example" : {
+        "organization_info" : {
+          "promoter_id" : "promoter_id",
+          "promoter_name" : "promoter_name"
+        },
+        "date_time_properties" : {
+          "time_hidden" : true,
+          "date_hidden" : true
+        },
+        "visibility" : {
+          "visibility_override" : {
+            "visibility" : "VISIBLE",
+            "starts_on" : "2000-01-23T04:56:07.000+00:00"
+          },
+          "default_visibility" : "VISIBLE"
+        },
+        "doors_date_time_properties" : {
+          "time_hidden" : true,
+          "date_hidden" : true
+        },
+        "text_infos" : [ {
+          "name" : "name",
+          "description" : "description",
+          "lang" : "lang"
+        }, {
+          "name" : "name",
+          "description" : "description",
+          "lang" : "lang"
+        } ],
+        "face_value_prices" : [ {
+          "price_period" : {
+            "end_date_time" : "2000-01-23T04:56:07.000+00:00",
+            "id" : "id",
+            "start_date_time" : "2000-01-23T04:56:07.000+00:00"
+          },
+          "prices" : [ {
+            "price_type_id" : "price_type_id",
+            "amount" : "amount",
+            "price_level_id" : "price_level_id"
+          }, {
+            "price_type_id" : "price_type_id",
+            "amount" : "amount",
+            "price_level_id" : "price_level_id"
+          } ]
+        }, {
+          "price_period" : {
+            "end_date_time" : "2000-01-23T04:56:07.000+00:00",
+            "id" : "id",
+            "start_date_time" : "2000-01-23T04:56:07.000+00:00"
+          },
+          "prices" : [ {
+            "price_type_id" : "price_type_id",
+            "amount" : "amount",
+            "price_level_id" : "price_level_id"
+          }, {
+            "price_type_id" : "price_type_id",
+            "amount" : "amount",
+            "price_level_id" : "price_level_id"
+          } ]
+        } ],
+        "event_id" : "event_id",
+        "maximum_tickets_quantity" : 1,
+        "genre_info" : [ {
+          "genre_name" : "genre_name",
+          "genre_id" : "genre_id"
+        }, {
+          "genre_name" : "genre_name",
+          "genre_id" : "genre_id"
+        } ],
+        "date_time" : "2000-01-23T04:56:07.000+00:00",
+        "last_modification" : "2000-01-23T04:56:07.000+00:00",
+        "price_types" : [ {
+          "access_code" : "access_code",
+          "id" : "id",
+          "text_infos" : [ {
+            "additional_info" : "additional_info",
+            "name" : "name",
+            "description" : "description",
+            "lang" : "lang",
+            "printed_description" : "printed_description"
+          }, {
+            "additional_info" : "additional_info",
+            "name" : "name",
+            "description" : "description",
+            "lang" : "lang",
+            "printed_description" : "printed_description"
+          } ],
+          "regular" : false
+        }, {
+          "access_code" : "access_code",
+          "id" : "id",
+          "text_infos" : [ {
+            "additional_info" : "additional_info",
+            "name" : "name",
+            "description" : "description",
+            "lang" : "lang",
+            "printed_description" : "printed_description"
+          }, {
+            "additional_info" : "additional_info",
+            "name" : "name",
+            "description" : "description",
+            "lang" : "lang",
+            "printed_description" : "printed_description"
+          } ],
+          "regular" : false
+        } ],
+        "doors_date_time" : "2000-01-23T04:56:07.000+00:00",
+        "price_levels" : [ {
+          "id" : "id",
+          "text_infos" : [ {
+            "name" : "name",
+            "description" : "description",
+            "lang" : "lang"
+          }, {
+            "name" : "name",
+            "description" : "description",
+            "lang" : "lang"
+          } ]
+        }, {
+          "id" : "id",
+          "text_infos" : [ {
+            "name" : "name",
+            "description" : "description",
+            "lang" : "lang"
+          }, {
+            "name" : "name",
+            "description" : "description",
+            "lang" : "lang"
+          } ]
+        } ],
+        "manifest_id" : "manifest_id"
+      }
+    },
+    "EventInfo" : {
+      "type" : "object",
+      "required" : [ "event", "status" ],
+      "properties" : {
+        "event" : {
+          "$ref" : "#/definitions/Event"
+        },
+        "status" : {
+          "type" : "string",
+          "enum" : [ "ON_SALE", "CANCELED" ]
+        }
+      },
+      "example" : {
+        "event" : {
+          "organization_info" : {
+            "promoter_id" : "promoter_id",
+            "promoter_name" : "promoter_name"
+          },
+          "date_time_properties" : {
+            "time_hidden" : true,
+            "date_hidden" : true
+          },
+          "visibility" : {
+            "visibility_override" : {
+              "visibility" : "VISIBLE",
+              "starts_on" : "2000-01-23T04:56:07.000+00:00"
+            },
+            "default_visibility" : "VISIBLE"
+          },
+          "doors_date_time_properties" : {
+            "time_hidden" : true,
+            "date_hidden" : true
+          },
+          "text_infos" : [ {
+            "name" : "name",
+            "description" : "description",
+            "lang" : "lang"
+          }, {
+            "name" : "name",
+            "description" : "description",
+            "lang" : "lang"
+          } ],
+          "face_value_prices" : [ {
+            "price_period" : {
+              "end_date_time" : "2000-01-23T04:56:07.000+00:00",
+              "id" : "id",
+              "start_date_time" : "2000-01-23T04:56:07.000+00:00"
+            },
+            "prices" : [ {
+              "price_type_id" : "price_type_id",
+              "amount" : "amount",
+              "price_level_id" : "price_level_id"
+            }, {
+              "price_type_id" : "price_type_id",
+              "amount" : "amount",
+              "price_level_id" : "price_level_id"
+            } ]
+          }, {
+            "price_period" : {
+              "end_date_time" : "2000-01-23T04:56:07.000+00:00",
+              "id" : "id",
+              "start_date_time" : "2000-01-23T04:56:07.000+00:00"
+            },
+            "prices" : [ {
+              "price_type_id" : "price_type_id",
+              "amount" : "amount",
+              "price_level_id" : "price_level_id"
+            }, {
+              "price_type_id" : "price_type_id",
+              "amount" : "amount",
+              "price_level_id" : "price_level_id"
+            } ]
+          } ],
+          "event_id" : "event_id",
+          "maximum_tickets_quantity" : 1,
+          "genre_info" : [ {
+            "genre_name" : "genre_name",
+            "genre_id" : "genre_id"
+          }, {
+            "genre_name" : "genre_name",
+            "genre_id" : "genre_id"
+          } ],
+          "date_time" : "2000-01-23T04:56:07.000+00:00",
+          "last_modification" : "2000-01-23T04:56:07.000+00:00",
+          "price_types" : [ {
+            "access_code" : "access_code",
+            "id" : "id",
+            "text_infos" : [ {
+              "additional_info" : "additional_info",
+              "name" : "name",
+              "description" : "description",
+              "lang" : "lang",
+              "printed_description" : "printed_description"
+            }, {
+              "additional_info" : "additional_info",
+              "name" : "name",
+              "description" : "description",
+              "lang" : "lang",
+              "printed_description" : "printed_description"
+            } ],
+            "regular" : false
+          }, {
+            "access_code" : "access_code",
+            "id" : "id",
+            "text_infos" : [ {
+              "additional_info" : "additional_info",
+              "name" : "name",
+              "description" : "description",
+              "lang" : "lang",
+              "printed_description" : "printed_description"
+            }, {
+              "additional_info" : "additional_info",
+              "name" : "name",
+              "description" : "description",
+              "lang" : "lang",
+              "printed_description" : "printed_description"
+            } ],
+            "regular" : false
+          } ],
+          "doors_date_time" : "2000-01-23T04:56:07.000+00:00",
+          "price_levels" : [ {
+            "id" : "id",
+            "text_infos" : [ {
+              "name" : "name",
+              "description" : "description",
+              "lang" : "lang"
+            }, {
+              "name" : "name",
+              "description" : "description",
+              "lang" : "lang"
+            } ]
+          }, {
+            "id" : "id",
+            "text_infos" : [ {
+              "name" : "name",
+              "description" : "description",
+              "lang" : "lang"
+            }, {
+              "name" : "name",
+              "description" : "description",
+              "lang" : "lang"
+            } ]
+          } ],
+          "manifest_id" : "manifest_id"
+        },
+        "status" : "ON_SALE"
+      }
+    },
+    "GAareaAvailability" : {
+      "type" : "object",
+      "required" : [ "price_level_id", "quantities" ],
+      "properties" : {
+        "level_id" : {
+          "type" : "string",
+          "description" : "Level id",
+          "maxLength" : 45
+        },
+        "section_id" : {
+          "type" : "string",
+          "description" : "Section id",
+          "maxLength" : 45
+        },
+        "price_level_id" : {
+          "type" : "string",
+          "description" : "Price level or price category for all seats of the area",
+          "maxLength" : 45
+        },
+        "quantities" : {
+          "$ref" : "#/definitions/GAareaAvailability_quantities"
+        }
+      },
+      "example" : {
+        "price_level_id" : "price_level_id",
+        "section_id" : "section_id",
+        "level_id" : "level_id",
+        "quantities" : {
+          "unavailable" : 0,
+          "available" : 0
+        }
+      }
+    },
+    "RSareaAvailability" : {
+      "type" : "object",
+      "required" : [ "quantities" ],
+      "properties" : {
+        "level_id" : {
+          "type" : "string",
+          "description" : "Level id",
+          "maxLength" : 45
+        },
+        "section_id" : {
+          "type" : "string",
+          "description" : "Section id",
+          "maxLength" : 45
+        },
+        "quantities" : {
+          "$ref" : "#/definitions/GAareaAvailability_quantities"
+        },
+        "rows" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/RSareaAvailability_rows"
+          }
+        }
+      },
+      "example" : {
+        "section_id" : "section_id",
+        "level_id" : "level_id",
+        "quantities" : {
+          "unavailable" : 0,
+          "available" : 0
+        },
+        "rows" : [ {
+          "row" : "row",
+          "seats" : {
+            "available" : [ "available", "available" ]
+          }
+        }, {
+          "row" : "row",
+          "seats" : {
+            "available" : [ "available", "available" ]
+          }
+        } ]
+      }
+    },
+    "EventAvailability" : {
+      "type" : "object",
+      "required" : [ "manifest_id", "venue_id" ],
+      "properties" : {
+        "venue_id" : {
+          "type" : "string",
+          "description" : "Venue associated to the event",
+          "maxLength" : 45
+        },
+        "manifest_id" : {
+          "type" : "string",
+          "description" : "Manifest identifier",
+          "maxLength" : 45
+        },
+        "ga_areas" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/GAareaAvailability"
+          }
+        },
+        "rs_areas" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/RSareaAvailability"
+          }
+        }
+      },
+      "example" : {
+        "rs_areas" : [ {
+          "section_id" : "section_id",
+          "level_id" : "level_id",
+          "quantities" : {
+            "unavailable" : 0,
+            "available" : 0
+          },
+          "rows" : [ {
+            "row" : "row",
+            "seats" : {
+              "available" : [ "available", "available" ]
+            }
+          }, {
+            "row" : "row",
+            "seats" : {
+              "available" : [ "available", "available" ]
+            }
+          } ]
+        }, {
+          "section_id" : "section_id",
+          "level_id" : "level_id",
+          "quantities" : {
+            "unavailable" : 0,
+            "available" : 0
+          },
+          "rows" : [ {
+            "row" : "row",
+            "seats" : {
+              "available" : [ "available", "available" ]
+            }
+          }, {
+            "row" : "row",
+            "seats" : {
+              "available" : [ "available", "available" ]
+            }
+          } ]
+        } ],
+        "manifest_id" : "manifest_id",
+        "venue_id" : "venue_id",
+        "ga_areas" : [ {
+          "price_level_id" : "price_level_id",
+          "section_id" : "section_id",
+          "level_id" : "level_id",
+          "quantities" : {
+            "unavailable" : 0,
+            "available" : 0
+          }
+        }, {
+          "price_level_id" : "price_level_id",
+          "section_id" : "section_id",
+          "level_id" : "level_id",
+          "quantities" : {
+            "unavailable" : 0,
+            "available" : 0
+          }
+        } ]
+      }
+    },
+    "GAarea" : {
+      "type" : "object",
+      "required" : [ "capacity", "price_level_id" ],
+      "properties" : {
+        "level_id" : {
+          "type" : "string",
+          "description" : "Level id",
+          "maxLength" : 45
+        },
+        "section_id" : {
+          "type" : "string",
+          "description" : "Section id",
+          "maxLength" : 45
+        },
+        "price_level_id" : {
+          "type" : "string",
+          "description" : "Price level or price category for all seats of the area",
+          "maxLength" : 45
+        },
+        "free_text" : {
+          "type" : "string",
+          "description" : "Free text to include on tickets, will apply to all seats of the area",
+          "maxLength" : 15
+        },
+        "capacity" : {
+          "type" : "integer",
+          "description" : "Total capacity for the area",
+          "minimum" : 1
+        }
+      },
+      "example" : {
+        "price_level_id" : "price_level_id",
+        "section_id" : "section_id",
+        "level_id" : "level_id",
+        "free_text" : "free_text",
+        "capacity" : 1
+      }
+    },
+    "RSarea" : {
+      "type" : "object",
+      "required" : [ "price_level_id", "rows" ],
+      "properties" : {
+        "level_id" : {
+          "type" : "string",
+          "description" : "Level id",
+          "maxLength" : 45
+        },
+        "section_id" : {
+          "type" : "string",
+          "description" : "Section id",
+          "maxLength" : 45
+        },
+        "price_level_id" : {
+          "type" : "string",
+          "description" : "Default price level or price category for all seats of the area",
+          "maxLength" : 45
+        },
+        "free_text" : {
+          "type" : "string",
+          "description" : "Default free text to include on tickets, will apply to all seats of the area",
+          "maxLength" : 15
+        },
+        "rows" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/RSarea_rows"
+          },
+          "minItems" : 1
+        }
+      },
+      "example" : {
+        "price_level_id" : "price_level_id",
+        "section_id" : "section_id",
+        "level_id" : "level_id",
+        "free_text" : "free_text",
+        "rows" : [ {
+          "position_y" : 1,
+          "row" : "row",
+          "seats" : [ {
+            "seat" : "seat",
+            "position_x" : 1,
+            "free_text" : "free_text",
+            "killed" : false
+          }, {
+            "seat" : "seat",
+            "position_x" : 1,
+            "free_text" : "free_text",
+            "killed" : false
+          } ]
+        }, {
+          "position_y" : 1,
+          "row" : "row",
+          "seats" : [ {
+            "seat" : "seat",
+            "position_x" : 1,
+            "free_text" : "free_text",
+            "killed" : false
+          }, {
+            "seat" : "seat",
+            "position_x" : 1,
+            "free_text" : "free_text",
+            "killed" : false
+          } ]
+        } ]
+      }
+    },
+    "Manifest" : {
+      "type" : "object",
+      "required" : [ "description", "manifest_id", "price_levels", "venue_id" ],
+      "properties" : {
+        "manifest_id" : {
+          "type" : "string",
+          "description" : "Manifest identifier",
+          "maxLength" : 45
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "Manifest description",
+          "maxLength" : 100
+        },
+        "venue_id" : {
+          "type" : "string",
+          "description" : "Venue associated to the manifest",
+          "maxLength" : 45
+        },
+        "total_capacity" : {
+          "type" : "integer",
+          "description" : "Total capacity for the manifest that must match the total number of seats in all areas",
+          "minimum" : 1
+        },
+        "ga_areas" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/GAarea"
+          }
+        },
+        "rs_areas" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/RSarea"
+          }
+        },
+        "sections" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Manifest_sections"
+          }
+        },
+        "levels" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Manifest_levels"
+          }
+        },
+        "price_levels" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Manifest_price_levels"
+          },
+          "minItems" : 1
+        }
+      },
+      "example" : {
+        "rs_areas" : [ {
+          "price_level_id" : "price_level_id",
+          "section_id" : "section_id",
+          "level_id" : "level_id",
+          "free_text" : "free_text",
+          "rows" : [ {
+            "position_y" : 1,
+            "row" : "row",
+            "seats" : [ {
+              "seat" : "seat",
+              "position_x" : 1,
+              "free_text" : "free_text",
+              "killed" : false
+            }, {
+              "seat" : "seat",
+              "position_x" : 1,
+              "free_text" : "free_text",
+              "killed" : false
+            } ]
+          }, {
+            "position_y" : 1,
+            "row" : "row",
+            "seats" : [ {
+              "seat" : "seat",
+              "position_x" : 1,
+              "free_text" : "free_text",
+              "killed" : false
+            }, {
+              "seat" : "seat",
+              "position_x" : 1,
+              "free_text" : "free_text",
+              "killed" : false
+            } ]
+          } ]
+        }, {
+          "price_level_id" : "price_level_id",
+          "section_id" : "section_id",
+          "level_id" : "level_id",
+          "free_text" : "free_text",
+          "rows" : [ {
+            "position_y" : 1,
+            "row" : "row",
+            "seats" : [ {
+              "seat" : "seat",
+              "position_x" : 1,
+              "free_text" : "free_text",
+              "killed" : false
+            }, {
+              "seat" : "seat",
+              "position_x" : 1,
+              "free_text" : "free_text",
+              "killed" : false
+            } ]
+          }, {
+            "position_y" : 1,
+            "row" : "row",
+            "seats" : [ {
+              "seat" : "seat",
+              "position_x" : 1,
+              "free_text" : "free_text",
+              "killed" : false
+            }, {
+              "seat" : "seat",
+              "position_x" : 1,
+              "free_text" : "free_text",
+              "killed" : false
+            } ]
+          } ]
+        } ],
+        "description" : "description",
+        "price_levels" : [ {
+          "id" : "id"
+        }, {
+          "id" : "id"
+        } ],
+        "manifest_id" : "manifest_id",
+        "venue_id" : "venue_id",
+        "total_capacity" : 1,
+        "sections" : [ {
+          "description" : "description",
+          "id" : "id"
+        }, {
+          "description" : "description",
+          "id" : "id"
+        } ],
+        "levels" : [ {
+          "description" : "description",
+          "id" : "id"
+        }, {
+          "description" : "description",
+          "id" : "id"
+        } ],
+        "ga_areas" : [ {
+          "price_level_id" : "price_level_id",
+          "section_id" : "section_id",
+          "level_id" : "level_id",
+          "free_text" : "free_text",
+          "capacity" : 1
+        }, {
+          "price_level_id" : "price_level_id",
+          "section_id" : "section_id",
+          "level_id" : "level_id",
+          "free_text" : "free_text",
+          "capacity" : 1
+        } ]
+      }
+    },
+    "Page" : {
+      "type" : "object",
+      "required" : [ "number", "size", "total_elements", "total_pages" ],
+      "properties" : {
+        "size" : {
+          "type" : "integer",
+          "description" : "size of page"
+        },
+        "total_elements" : {
+          "type" : "integer",
+          "description" : "total number of available elements"
+        },
+        "total_pages" : {
+          "type" : "integer",
+          "description" : "total number of available pages"
+        },
+        "number" : {
+          "type" : "integer",
+          "description" : "current page number counted from 0"
+        }
+      },
+      "example" : {
+        "number" : 5,
+        "size" : 6,
+        "total_elements" : 1,
+        "total_pages" : 5
+      }
+    },
+    "EventInfoList" : {
+      "type" : "object",
+      "required" : [ "events_info", "page" ],
+      "properties" : {
+        "events_info" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/EventInfo"
+          }
+        },
+        "page" : {
+          "$ref" : "#/definitions/Page"
+        }
+      },
+      "example" : {
+        "events_info" : [ {
+          "event" : {
+            "organization_info" : {
+              "promoter_id" : "promoter_id",
+              "promoter_name" : "promoter_name"
+            },
+            "date_time_properties" : {
+              "time_hidden" : true,
+              "date_hidden" : true
+            },
+            "visibility" : {
+              "visibility_override" : {
+                "visibility" : "VISIBLE",
+                "starts_on" : "2000-01-23T04:56:07.000+00:00"
+              },
+              "default_visibility" : "VISIBLE"
+            },
+            "doors_date_time_properties" : {
+              "time_hidden" : true,
+              "date_hidden" : true
+            },
+            "text_infos" : [ {
+              "name" : "name",
+              "description" : "description",
+              "lang" : "lang"
+            }, {
+              "name" : "name",
+              "description" : "description",
+              "lang" : "lang"
+            } ],
+            "face_value_prices" : [ {
+              "price_period" : {
+                "end_date_time" : "2000-01-23T04:56:07.000+00:00",
+                "id" : "id",
+                "start_date_time" : "2000-01-23T04:56:07.000+00:00"
+              },
+              "prices" : [ {
+                "price_type_id" : "price_type_id",
+                "amount" : "amount",
+                "price_level_id" : "price_level_id"
+              }, {
+                "price_type_id" : "price_type_id",
+                "amount" : "amount",
+                "price_level_id" : "price_level_id"
+              } ]
+            }, {
+              "price_period" : {
+                "end_date_time" : "2000-01-23T04:56:07.000+00:00",
+                "id" : "id",
+                "start_date_time" : "2000-01-23T04:56:07.000+00:00"
+              },
+              "prices" : [ {
+                "price_type_id" : "price_type_id",
+                "amount" : "amount",
+                "price_level_id" : "price_level_id"
+              }, {
+                "price_type_id" : "price_type_id",
+                "amount" : "amount",
+                "price_level_id" : "price_level_id"
+              } ]
+            } ],
+            "event_id" : "event_id",
+            "maximum_tickets_quantity" : 1,
+            "genre_info" : [ {
+              "genre_name" : "genre_name",
+              "genre_id" : "genre_id"
+            }, {
+              "genre_name" : "genre_name",
+              "genre_id" : "genre_id"
+            } ],
+            "date_time" : "2000-01-23T04:56:07.000+00:00",
+            "last_modification" : "2000-01-23T04:56:07.000+00:00",
+            "price_types" : [ {
+              "access_code" : "access_code",
+              "id" : "id",
+              "text_infos" : [ {
+                "additional_info" : "additional_info",
+                "name" : "name",
+                "description" : "description",
+                "lang" : "lang",
+                "printed_description" : "printed_description"
+              }, {
+                "additional_info" : "additional_info",
+                "name" : "name",
+                "description" : "description",
+                "lang" : "lang",
+                "printed_description" : "printed_description"
+              } ],
+              "regular" : false
+            }, {
+              "access_code" : "access_code",
+              "id" : "id",
+              "text_infos" : [ {
+                "additional_info" : "additional_info",
+                "name" : "name",
+                "description" : "description",
+                "lang" : "lang",
+                "printed_description" : "printed_description"
+              }, {
+                "additional_info" : "additional_info",
+                "name" : "name",
+                "description" : "description",
+                "lang" : "lang",
+                "printed_description" : "printed_description"
+              } ],
+              "regular" : false
+            } ],
+            "doors_date_time" : "2000-01-23T04:56:07.000+00:00",
+            "price_levels" : [ {
+              "id" : "id",
+              "text_infos" : [ {
+                "name" : "name",
+                "description" : "description",
+                "lang" : "lang"
+              }, {
+                "name" : "name",
+                "description" : "description",
+                "lang" : "lang"
+              } ]
+            }, {
+              "id" : "id",
+              "text_infos" : [ {
+                "name" : "name",
+                "description" : "description",
+                "lang" : "lang"
+              }, {
+                "name" : "name",
+                "description" : "description",
+                "lang" : "lang"
+              } ]
+            } ],
+            "manifest_id" : "manifest_id"
+          },
+          "status" : "ON_SALE"
+        }, {
+          "event" : {
+            "organization_info" : {
+              "promoter_id" : "promoter_id",
+              "promoter_name" : "promoter_name"
+            },
+            "date_time_properties" : {
+              "time_hidden" : true,
+              "date_hidden" : true
+            },
+            "visibility" : {
+              "visibility_override" : {
+                "visibility" : "VISIBLE",
+                "starts_on" : "2000-01-23T04:56:07.000+00:00"
+              },
+              "default_visibility" : "VISIBLE"
+            },
+            "doors_date_time_properties" : {
+              "time_hidden" : true,
+              "date_hidden" : true
+            },
+            "text_infos" : [ {
+              "name" : "name",
+              "description" : "description",
+              "lang" : "lang"
+            }, {
+              "name" : "name",
+              "description" : "description",
+              "lang" : "lang"
+            } ],
+            "face_value_prices" : [ {
+              "price_period" : {
+                "end_date_time" : "2000-01-23T04:56:07.000+00:00",
+                "id" : "id",
+                "start_date_time" : "2000-01-23T04:56:07.000+00:00"
+              },
+              "prices" : [ {
+                "price_type_id" : "price_type_id",
+                "amount" : "amount",
+                "price_level_id" : "price_level_id"
+              }, {
+                "price_type_id" : "price_type_id",
+                "amount" : "amount",
+                "price_level_id" : "price_level_id"
+              } ]
+            }, {
+              "price_period" : {
+                "end_date_time" : "2000-01-23T04:56:07.000+00:00",
+                "id" : "id",
+                "start_date_time" : "2000-01-23T04:56:07.000+00:00"
+              },
+              "prices" : [ {
+                "price_type_id" : "price_type_id",
+                "amount" : "amount",
+                "price_level_id" : "price_level_id"
+              }, {
+                "price_type_id" : "price_type_id",
+                "amount" : "amount",
+                "price_level_id" : "price_level_id"
+              } ]
+            } ],
+            "event_id" : "event_id",
+            "maximum_tickets_quantity" : 1,
+            "genre_info" : [ {
+              "genre_name" : "genre_name",
+              "genre_id" : "genre_id"
+            }, {
+              "genre_name" : "genre_name",
+              "genre_id" : "genre_id"
+            } ],
+            "date_time" : "2000-01-23T04:56:07.000+00:00",
+            "last_modification" : "2000-01-23T04:56:07.000+00:00",
+            "price_types" : [ {
+              "access_code" : "access_code",
+              "id" : "id",
+              "text_infos" : [ {
+                "additional_info" : "additional_info",
+                "name" : "name",
+                "description" : "description",
+                "lang" : "lang",
+                "printed_description" : "printed_description"
+              }, {
+                "additional_info" : "additional_info",
+                "name" : "name",
+                "description" : "description",
+                "lang" : "lang",
+                "printed_description" : "printed_description"
+              } ],
+              "regular" : false
+            }, {
+              "access_code" : "access_code",
+              "id" : "id",
+              "text_infos" : [ {
+                "additional_info" : "additional_info",
+                "name" : "name",
+                "description" : "description",
+                "lang" : "lang",
+                "printed_description" : "printed_description"
+              }, {
+                "additional_info" : "additional_info",
+                "name" : "name",
+                "description" : "description",
+                "lang" : "lang",
+                "printed_description" : "printed_description"
+              } ],
+              "regular" : false
+            } ],
+            "doors_date_time" : "2000-01-23T04:56:07.000+00:00",
+            "price_levels" : [ {
+              "id" : "id",
+              "text_infos" : [ {
+                "name" : "name",
+                "description" : "description",
+                "lang" : "lang"
+              }, {
+                "name" : "name",
+                "description" : "description",
+                "lang" : "lang"
+              } ]
+            }, {
+              "id" : "id",
+              "text_infos" : [ {
+                "name" : "name",
+                "description" : "description",
+                "lang" : "lang"
+              }, {
+                "name" : "name",
+                "description" : "description",
+                "lang" : "lang"
+              } ]
+            } ],
+            "manifest_id" : "manifest_id"
+          },
+          "status" : "ON_SALE"
+        } ],
+        "page" : {
+          "number" : 5,
+          "size" : 6,
+          "total_elements" : 1,
+          "total_pages" : 5
+        }
+      }
+    },
+    "ChannelInfo" : {
+      "type" : "object",
+      "required" : [ "channel_type", "sub_channel_name" ],
+      "properties" : {
+        "channel_type" : {
+          "type" : "string",
+          "description" : "Sale channel type",
+          "enum" : [ "INTERNET", "TELEPHONE", "OUTLET" ]
+        },
+        "sub_channel_name" : {
+          "type" : "string",
+          "description" : "Sale subchannel name",
+          "maxLength" : 32
+        }
+      },
+      "example" : {
+        "sub_channel_name" : "sub_channel_name",
+        "channel_type" : "INTERNET"
+      }
+    },
+    "Search" : {
+      "type" : "object",
+      "required" : [ "index", "search_type" ],
+      "properties" : {
+        "index" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "Search index, so responses can be matched with request",
+          "minimum" : 1
+        },
+        "accept_non_adjacent" : {
+          "type" : "boolean",
+          "description" : "True if non adjacent seats accepted for the search"
+        },
+        "accept_alternate" : {
+          "type" : "array",
+          "description" : "If alternate seats is accepted for this search. If parameter is not present or array is \nempty, no alternate tickets proposition must be returned.\n\"AREA\" - Alternate seats can only come from a different area,\n\"PRICE_LEVEL\" - Alternate seats can come from a different price category.\n",
+          "items" : {
+            "type" : "string",
+            "enum" : [ "AREA", "PRICE_LEVEL" ]
+          }
+        },
+        "search_type" : {
+          "type" : "string",
+          "description" : "Type of search",
+          "enum" : [ "BESTAVAIL", "SPECIFIC" ]
+        },
+        "bestavail" : {
+          "$ref" : "#/definitions/Search_bestavail"
+        },
+        "specific" : {
+          "$ref" : "#/definitions/Search_specific"
+        }
+      },
+      "example" : {
+        "accept_alternate" : [ "AREA", "AREA" ],
+        "accept_non_adjacent" : true,
+        "index" : 1,
+        "specific" : {
+          "tickets" : [ {
+            "seat" : "seat",
+            "price_type_id" : "price_type_id",
+            "price_level_id" : "price_level_id",
+            "level" : "level",
+            "section" : "section",
+            "row" : "row"
+          }, {
+            "seat" : "seat",
+            "price_type_id" : "price_type_id",
+            "price_level_id" : "price_level_id",
+            "level" : "level",
+            "section" : "section",
+            "row" : "row"
+          } ]
+        },
+        "search_type" : "BESTAVAIL",
+        "bestavail" : {
+          "price_types" : [ {
+            "quantity" : 1,
+            "id" : "id"
+          }, {
+            "quantity" : 1,
+            "id" : "id"
+          } ],
+          "areas" : [ {
+            "level" : "level",
+            "section" : "section"
+          }, {
+            "level" : "level",
+            "section" : "section"
+          } ],
+          "price_level_ids" : [ "price_level_ids", "price_level_ids" ]
+        }
+      }
+    },
+    "InventoryRequest" : {
+      "type" : "object",
+      "required" : [ "channel_info", "event_id", "language", "last_modification", "searches" ],
+      "properties" : {
+        "language" : {
+          "type" : "string",
+          "format" : "^[a-z]{2}-[a-z]{2}$",
+          "description" : "ISO language and country codes (Example \"es-es\"). Language for some request parameters. Language cannot change once inventory is locked."
+        },
+        "channel_info" : {
+          "$ref" : "#/definitions/ChannelInfo"
+        },
+        "event_id" : {
+          "type" : "string",
+          "description" : "Event identifier.",
+          "maxLength" : 45
+        },
+        "last_modification" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "UTC date and time of the event last modification"
+        },
+        "searches" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Search"
+          },
+          "minItems" : 1
+        }
+      },
+      "example" : {
+        "searches" : [ {
+          "accept_alternate" : [ "AREA", "AREA" ],
+          "accept_non_adjacent" : true,
+          "index" : 1,
+          "specific" : {
+            "tickets" : [ {
+              "seat" : "seat",
+              "price_type_id" : "price_type_id",
+              "price_level_id" : "price_level_id",
+              "level" : "level",
+              "section" : "section",
+              "row" : "row"
+            }, {
+              "seat" : "seat",
+              "price_type_id" : "price_type_id",
+              "price_level_id" : "price_level_id",
+              "level" : "level",
+              "section" : "section",
+              "row" : "row"
+            } ]
+          },
+          "search_type" : "BESTAVAIL",
+          "bestavail" : {
+            "price_types" : [ {
+              "quantity" : 1,
+              "id" : "id"
+            }, {
+              "quantity" : 1,
+              "id" : "id"
+            } ],
+            "areas" : [ {
+              "level" : "level",
+              "section" : "section"
+            }, {
+              "level" : "level",
+              "section" : "section"
+            } ],
+            "price_level_ids" : [ "price_level_ids", "price_level_ids" ]
+          }
+        }, {
+          "accept_alternate" : [ "AREA", "AREA" ],
+          "accept_non_adjacent" : true,
+          "index" : 1,
+          "specific" : {
+            "tickets" : [ {
+              "seat" : "seat",
+              "price_type_id" : "price_type_id",
+              "price_level_id" : "price_level_id",
+              "level" : "level",
+              "section" : "section",
+              "row" : "row"
+            }, {
+              "seat" : "seat",
+              "price_type_id" : "price_type_id",
+              "price_level_id" : "price_level_id",
+              "level" : "level",
+              "section" : "section",
+              "row" : "row"
+            } ]
+          },
+          "search_type" : "BESTAVAIL",
+          "bestavail" : {
+            "price_types" : [ {
+              "quantity" : 1,
+              "id" : "id"
+            }, {
+              "quantity" : 1,
+              "id" : "id"
+            } ],
+            "areas" : [ {
+              "level" : "level",
+              "section" : "section"
+            }, {
+              "level" : "level",
+              "section" : "section"
+            } ],
+            "price_level_ids" : [ "price_level_ids", "price_level_ids" ]
+          }
+        } ],
+        "event_id" : "event_id",
+        "last_modification" : "2000-01-23T04:56:07.000+00:00",
+        "language" : "language",
+        "channel_info" : {
+          "sub_channel_name" : "sub_channel_name",
+          "channel_type" : "INTERNET"
+        }
+      }
+    },
+    "FullTicket" : {
+      "type" : "object",
+      "required" : [ "price_level_id", "price_type_id", "ticket_id" ],
+      "properties" : {
+        "price_level_id" : {
+          "type" : "string",
+          "description" : "Ticket price level id",
+          "maxLength" : 45
+        },
+        "price_type_id" : {
+          "type" : "string",
+          "description" : "Ticket price type id",
+          "maxLength" : 45
+        },
+        "ticket_id" : {
+          "type" : "string",
+          "description" : "Ticket id",
+          "maxLength" : 36
+        },
+        "level" : {
+          "type" : "string",
+          "description" : "Ticket level id",
+          "maxLength" : 45
+        },
+        "section" : {
+          "type" : "string",
+          "description" : "Ticket section id",
+          "maxLength" : 45
+        },
+        "row" : {
+          "type" : "string",
+          "description" : "Row for reserved seat ticket. Won't be present for general admission",
+          "maxLength" : 45
+        },
+        "seat" : {
+          "type" : "string",
+          "description" : "Seat number",
+          "maxLength" : 45
+        }
+      },
+      "example" : {
+        "seat" : "seat",
+        "price_type_id" : "price_type_id",
+        "price_level_id" : "price_level_id",
+        "level" : "level",
+        "section" : "section",
+        "row" : "row",
+        "ticket_id" : "ticket_id"
+      }
+    },
+    "Ticket" : {
+      "type" : "object",
+      "required" : [ "price_level_id", "price_type_id", "seat" ],
+      "properties" : {
+        "price_level_id" : {
+          "type" : "string",
+          "description" : "Ticket price level id",
+          "maxLength" : 45
+        },
+        "price_type_id" : {
+          "type" : "string",
+          "description" : "Ticket price type id",
+          "maxLength" : 45
+        },
+        "level" : {
+          "type" : "string",
+          "description" : "Ticket level id",
+          "maxLength" : 45
+        },
+        "section" : {
+          "type" : "string",
+          "description" : "Ticket section id",
+          "maxLength" : 45
+        },
+        "row" : {
+          "type" : "string",
+          "description" : "Row for reserved seat ticket. Won't be present for general admission",
+          "maxLength" : 45
+        },
+        "seat" : {
+          "type" : "string",
+          "description" : "Seat number",
+          "maxLength" : 45
+        }
+      },
+      "example" : {
+        "seat" : "seat",
+        "price_type_id" : "price_type_id",
+        "price_level_id" : "price_level_id",
+        "level" : "level",
+        "section" : "section",
+        "row" : "row"
+      }
+    },
+    "Result" : {
+      "type" : "object",
+      "required" : [ "search_index", "status" ],
+      "properties" : {
+        "search_index" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "Search index, so responses can be matched with request"
+        },
+        "status" : {
+          "$ref" : "#/definitions/StatusResponse"
+        },
+        "non_adjacent" : {
+          "type" : "boolean",
+          "description" : "True for non adjacent seats"
+        },
+        "alternate" : {
+          "type" : "boolean",
+          "description" : "True for alternate seats"
+        },
+        "tickets" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/FullTicket"
+          }
+        }
+      },
+      "example" : {
+        "search_index" : 6,
+        "tickets" : [ {
+          "seat" : "seat",
+          "price_type_id" : "price_type_id",
+          "price_level_id" : "price_level_id",
+          "level" : "level",
+          "section" : "section",
+          "row" : "row",
+          "ticket_id" : "ticket_id"
+        }, {
+          "seat" : "seat",
+          "price_type_id" : "price_type_id",
+          "price_level_id" : "price_level_id",
+          "level" : "level",
+          "section" : "section",
+          "row" : "row",
+          "ticket_id" : "ticket_id"
+        } ],
+        "alternate" : true,
+        "non_adjacent" : true,
+        "status" : {
+          "id" : 1,
+          "message" : "message"
+        }
+      }
+    },
+    "InventoryResponse" : {
+      "type" : "object",
+      "required" : [ "event_id", "inventory_token", "inventory_ttl", "search_results" ],
+      "properties" : {
+        "event_id" : {
+          "type" : "string",
+          "description" : "Partner event id",
+          "maxLength" : 45
+        },
+        "inventory_token" : {
+          "type" : "string",
+          "description" : "Reservation reference that must be used for Commit or Release",
+          "maxLength" : 36,
+          "default" : ""
+        },
+        "inventory_ttl" : {
+          "type" : "integer",
+          "format" : "int64",
+          "description" : "Time to live in seconds for this reservation",
+          "default" : 0
+        },
+        "search_results" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Result"
+          },
+          "minItems" : 1
+        }
+      },
+      "example" : {
+        "inventory_ttl" : 0,
+        "event_id" : "event_id",
+        "search_results" : [ {
+          "search_index" : 6,
+          "tickets" : [ {
+            "seat" : "seat",
+            "price_type_id" : "price_type_id",
+            "price_level_id" : "price_level_id",
+            "level" : "level",
+            "section" : "section",
+            "row" : "row",
+            "ticket_id" : "ticket_id"
+          }, {
+            "seat" : "seat",
+            "price_type_id" : "price_type_id",
+            "price_level_id" : "price_level_id",
+            "level" : "level",
+            "section" : "section",
+            "row" : "row",
+            "ticket_id" : "ticket_id"
+          } ],
+          "alternate" : true,
+          "non_adjacent" : true,
+          "status" : {
+            "id" : 1,
+            "message" : "message"
+          }
+        }, {
+          "search_index" : 6,
+          "tickets" : [ {
+            "seat" : "seat",
+            "price_type_id" : "price_type_id",
+            "price_level_id" : "price_level_id",
+            "level" : "level",
+            "section" : "section",
+            "row" : "row",
+            "ticket_id" : "ticket_id"
+          }, {
+            "seat" : "seat",
+            "price_type_id" : "price_type_id",
+            "price_level_id" : "price_level_id",
+            "level" : "level",
+            "section" : "section",
+            "row" : "row",
+            "ticket_id" : "ticket_id"
+          } ],
+          "alternate" : true,
+          "non_adjacent" : true,
+          "status" : {
+            "id" : 1,
+            "message" : "message"
+          }
+        } ],
+        "inventory_token" : "inventory_token"
+      }
+    },
+    "StatusResponse" : {
+      "type" : "object",
+      "required" : [ "id", "message" ],
+      "properties" : {
+        "id" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "0 - Successful (no error)\n1 - Syntax error\n2 - Not processed\n101 - Invalid venue id\n102 - Invalid manifest id\n103 - Invalid level id\n104 - Invalid section id\n105 - Invalid row\n106 - Invalid seat\n107 - Invalid price level id\n108 - Invalid event id\n109 - Invalid price type id\n110 - Invalid language\n111 - Invalid channel type\n112 - Invalid payment method type\n113 - Invalid delivery method type\n114 - Invalid ticket id\n201 - Invalid search index\n202 - Invalid accept alternate criteria \n203 - Invalid search type\n204 - Invalid action\n205 - Invalid sort criteria\n206 - Invalid order id\n207 - Invalid order total amount\n208 - Invalid inventory tickets amount\n209 - Invalid payment card number\n210 - Invalid email\n211 - Invalid country id\n212 - Invalid price\n213 - Invalid last modification data time\n214 - Invalid size page\n215 - Invalid page number\n216 - Invalid availability level\n301 - Exceeded the number of tickets for request\n302 - Exceeded the number of tickets for search\n303 - Exceeded the number of available tickets\n304 - Exceeded the allowed time limit\n305 - Event not currently available\n306 - Event have no availability\n307 - Some of the requested items are not available\n308 - Unauthorized sales channel\n309 - The request does not correspond to the order\n310 - Partial requests are not allowed\n311 - Reservation has already released\n312 - Reservation has expired\n313 - Reservation has already been confirmed\n314 - Reservation has not been found\n315 - Order has already been canceled\n316 - Exceeded the number of tickets for customer\n317 - Venue not currently available \n318 - Manifest not currently available          \n"
+        },
+        "message" : {
+          "type" : "string"
+        }
+      },
+      "example" : {
+        "id" : 1,
+        "message" : "message"
+      }
+    },
+    "OrderInfo" : {
+      "type" : "object",
+      "required" : [ "inventory_tickets_amount", "order_id", "order_total_amount" ],
+      "properties" : {
+        "order_id" : {
+          "type" : "string",
+          "description" : "Ticketmaster order id",
+          "maxLength" : 45
+        },
+        "order_total_amount" : {
+          "type" : "string",
+          "description" : "Ticketmaster total order amount (Minor currency units ex. 2000 = 20EUR)",
+          "maxLength" : 12
+        },
+        "inventory_tickets_amount" : {
+          "type" : "string",
+          "description" : "Total tickets amount, excluding all fees (only face value)",
+          "maxLength" : 12
+        }
+      },
+      "example" : {
+        "inventory_tickets_amount" : "inventory_tickets_amount",
+        "order_id" : "order_id",
+        "order_total_amount" : "order_total_amount"
+      }
+    },
+    "PaymentInfo" : {
+      "type" : "object",
+      "required" : [ "payment_method_type" ],
+      "properties" : {
+        "payment_method_type" : {
+          "type" : "string",
+          "description" : "Payment method identifier\n\"NO\" - No Payment\n\"CASH\" - Cash\n\"CARD\" - Payment Card\n\"OTHERS\" - Others payment method\n",
+          "enum" : [ "NO", "CASH", "CARD", "OTHERS" ]
+        },
+        "payment_method_name" : {
+          "type" : "string",
+          "maxLength" : 32
+        },
+        "payment_card_number" : {
+          "type" : "string",
+          "format" : "[0-9]{4}",
+          "description" : "Last 4 digits of payment card"
+        }
+      },
+      "example" : {
+        "payment_method_type" : "NO",
+        "payment_card_number" : "payment_card_number",
+        "payment_method_name" : "payment_method_name"
+      }
+    },
+    "DeliveryInfo" : {
+      "type" : "object",
+      "required" : [ "delivery_method_type" ],
+      "properties" : {
+        "delivery_method_type" : {
+          "type" : "string",
+          "description" : "Delivery method identifier\n\"DS\" - Delivery service \n\"PH\" - Print at home\n\"PU\" - Pick-up\n\"NO\" - No pickup\n",
+          "enum" : [ "DS", "PH", "PU", "NO" ]
+        },
+        "delivery_method_name" : {
+          "type" : "string",
+          "maxLength" : 100
+        }
+      },
+      "example" : {
+        "delivery_method_name" : "delivery_method_name",
+        "delivery_method_type" : "DS"
+      }
+    },
+    "CustomerInfo" : {
+      "type" : "object",
+      "properties" : {
+        "customer_email" : {
+          "type" : "string",
+          "description" : "Customer email",
+          "maxLength" : 100
+        },
+        "first_name" : {
+          "type" : "string",
+          "description" : "Customer first name",
+          "maxLength" : 50
+        },
+        "last_name" : {
+          "type" : "string",
+          "description" : "Customer last name",
+          "maxLength" : 50
+        },
+        "address" : {
+          "type" : "array",
+          "description" : "Customer address lines",
+          "items" : {
+            "type" : "string",
+            "maxLength" : 40
+          },
+          "maxItems" : 2
+        },
+        "postal_code" : {
+          "type" : "string",
+          "description" : "Customer address postal code",
+          "maxLength" : 15
+        },
+        "city" : {
+          "type" : "string",
+          "description" : "Customer address city",
+          "maxLength" : 50
+        },
+        "province" : {
+          "type" : "string",
+          "description" : "Customer address province",
+          "maxLength" : 32
+        },
+        "country_id" : {
+          "type" : "string",
+          "description" : "Customer address ISO country id",
+          "maxLength" : 3
+        },
+        "phone" : {
+          "type" : "string",
+          "description" : "Customer primary phone number",
+          "maxLength" : 16
+        }
+      },
+      "example" : {
+        "address" : [ "address", "address" ],
+        "province" : "province",
+        "city" : "city",
+        "phone" : "phone",
+        "customer_email" : "customer_email",
+        "last_name" : "last_name",
+        "postal_code" : "postal_code",
+        "first_name" : "first_name",
+        "country_id" : "country_id"
+      }
+    },
+    "OrderRequest" : {
+      "type" : "object",
+      "required" : [ "inventory_token", "order_info", "payment_info" ],
+      "properties" : {
+        "inventory_token" : {
+          "type" : "string",
+          "description" : "Reservation reference that must be used for Commit or Release",
+          "maxLength" : 36
+        },
+        "order_info" : {
+          "$ref" : "#/definitions/OrderInfo"
+        },
+        "payment_info" : {
+          "$ref" : "#/definitions/PaymentInfo"
+        },
+        "delivery_info" : {
+          "$ref" : "#/definitions/DeliveryInfo"
+        },
+        "customer_info" : {
+          "$ref" : "#/definitions/CustomerInfo"
+        }
+      },
+      "example" : {
+        "delivery_info" : {
+          "delivery_method_name" : "delivery_method_name",
+          "delivery_method_type" : "DS"
+        },
+        "customer_info" : {
+          "address" : [ "address", "address" ],
+          "province" : "province",
+          "city" : "city",
+          "phone" : "phone",
+          "customer_email" : "customer_email",
+          "last_name" : "last_name",
+          "postal_code" : "postal_code",
+          "first_name" : "first_name",
+          "country_id" : "country_id"
+        },
+        "payment_info" : {
+          "payment_method_type" : "NO",
+          "payment_card_number" : "payment_card_number",
+          "payment_method_name" : "payment_method_name"
+        },
+        "inventory_token" : "inventory_token",
+        "order_info" : {
+          "inventory_tickets_amount" : "inventory_tickets_amount",
+          "order_id" : "order_id",
+          "order_total_amount" : "order_total_amount"
+        }
+      }
+    },
+    "OrderResponse" : {
+      "type" : "object",
+      "required" : [ "event_id", "inventory_order", "tickets" ],
+      "properties" : {
+        "event_id" : {
+          "type" : "string",
+          "description" : "Parnert event id",
+          "maxLength" : 45
+        },
+        "inventory_order" : {
+          "type" : "string",
+          "description" : "Partner order reference",
+          "maxLength" : 36
+        },
+        "tickets" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OrderResponse_tickets"
+          }
+        }
+      },
+      "example" : {
+        "event_id" : "event_id",
+        "tickets" : [ {
+          "ticket" : {
+            "seat" : "seat",
+            "price_type_id" : "price_type_id",
+            "price_level_id" : "price_level_id",
+            "level" : "level",
+            "section" : "section",
+            "row" : "row",
+            "ticket_id" : "ticket_id"
+          },
+          "price_without_fees" : "price_without_fees"
+        }, {
+          "ticket" : {
+            "seat" : "seat",
+            "price_type_id" : "price_type_id",
+            "price_level_id" : "price_level_id",
+            "level" : "level",
+            "section" : "section",
+            "row" : "row",
+            "ticket_id" : "ticket_id"
+          },
+          "price_without_fees" : "price_without_fees"
+        } ],
+        "inventory_order" : "inventory_order"
+      }
+    },
+    "OrderResponseList" : {
+      "type" : "object",
+      "required" : [ "orders_info", "page" ],
+      "properties" : {
+        "orders_info" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OrderResponse"
+          }
+        },
+        "page" : {
+          "$ref" : "#/definitions/Page"
+        }
+      },
+      "example" : {
+        "orders_info" : [ {
+          "event_id" : "event_id",
+          "tickets" : [ {
+            "ticket" : {
+              "seat" : "seat",
+              "price_type_id" : "price_type_id",
+              "price_level_id" : "price_level_id",
+              "level" : "level",
+              "section" : "section",
+              "row" : "row",
+              "ticket_id" : "ticket_id"
+            },
+            "price_without_fees" : "price_without_fees"
+          }, {
+            "ticket" : {
+              "seat" : "seat",
+              "price_type_id" : "price_type_id",
+              "price_level_id" : "price_level_id",
+              "level" : "level",
+              "section" : "section",
+              "row" : "row",
+              "ticket_id" : "ticket_id"
+            },
+            "price_without_fees" : "price_without_fees"
+          } ],
+          "inventory_order" : "inventory_order"
+        }, {
+          "event_id" : "event_id",
+          "tickets" : [ {
+            "ticket" : {
+              "seat" : "seat",
+              "price_type_id" : "price_type_id",
+              "price_level_id" : "price_level_id",
+              "level" : "level",
+              "section" : "section",
+              "row" : "row",
+              "ticket_id" : "ticket_id"
+            },
+            "price_without_fees" : "price_without_fees"
+          }, {
+            "ticket" : {
+              "seat" : "seat",
+              "price_type_id" : "price_type_id",
+              "price_level_id" : "price_level_id",
+              "level" : "level",
+              "section" : "section",
+              "row" : "row",
+              "ticket_id" : "ticket_id"
+            },
+            "price_without_fees" : "price_without_fees"
+          } ],
+          "inventory_order" : "inventory_order"
+        } ],
+        "page" : {
+          "number" : 5,
+          "size" : 6,
+          "total_elements" : 1,
+          "total_pages" : 5
+        }
+      }
+    },
+    "OrderStatus" : {
+      "type" : "object",
+      "required" : [ "event_id", "inventory_order", "tickets" ],
+      "properties" : {
+        "event_id" : {
+          "type" : "string",
+          "description" : "Parnert event id",
+          "maxLength" : 45
+        },
+        "inventory_order" : {
+          "type" : "string",
+          "description" : "Partner order reference",
+          "maxLength" : 36
+        },
+        "tickets" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OrderStatus_tickets"
+          },
+          "minItems" : 1
+        }
+      },
+      "example" : {
+        "event_id" : "event_id",
+        "tickets" : [ {
+          "printed" : true,
+          "ticket" : {
+            "seat" : "seat",
+            "price_type_id" : "price_type_id",
+            "price_level_id" : "price_level_id",
+            "level" : "level",
+            "section" : "section",
+            "row" : "row",
+            "ticket_id" : "ticket_id"
+          },
+          "cancelled" : true,
+          "printable" : true,
+          "cancellable" : true
+        }, {
+          "printed" : true,
+          "ticket" : {
+            "seat" : "seat",
+            "price_type_id" : "price_type_id",
+            "price_level_id" : "price_level_id",
+            "level" : "level",
+            "section" : "section",
+            "row" : "row",
+            "ticket_id" : "ticket_id"
+          },
+          "cancelled" : true,
+          "printable" : true,
+          "cancellable" : true
+        } ],
+        "inventory_order" : "inventory_order"
+      }
+    },
+    "OrderUpdateRequest" : {
+      "type" : "object",
+      "required" : [ "action", "channel_info", "language" ],
+      "properties" : {
+        "language" : {
+          "type" : "string",
+          "format" : "^[a-z]{2}-[a-z]{2}$",
+          "description" : "ISO language and country codes (Example \"es-es\"). Language for some request parameters."
+        },
+        "channel_info" : {
+          "$ref" : "#/definitions/ChannelInfo"
+        },
+        "event_id" : {
+          "type" : "string",
+          "description" : "Event identifier.",
+          "maxLength" : 45
+        },
+        "tickets" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/FullTicket"
+          }
+        },
+        "action" : {
+          "type" : "string",
+          "description" : "Action to update an order.\n\"PRINT\" - to set the status of the tickets to printed.\n\"ROLLBACK_PRINT\" - to reset the status to printable (for printing problems)\n\"CANCEL\" - to cancel the order\n",
+          "enum" : [ "PRINT", "ROLLBACK_PRINT", "CANCEL" ]
+        }
+      },
+      "example" : {
+        "event_id" : "event_id",
+        "tickets" : [ {
+          "seat" : "seat",
+          "price_type_id" : "price_type_id",
+          "price_level_id" : "price_level_id",
+          "level" : "level",
+          "section" : "section",
+          "row" : "row",
+          "ticket_id" : "ticket_id"
+        }, {
+          "seat" : "seat",
+          "price_type_id" : "price_type_id",
+          "price_level_id" : "price_level_id",
+          "level" : "level",
+          "section" : "section",
+          "row" : "row",
+          "ticket_id" : "ticket_id"
+        } ],
+        "action" : "PRINT",
+        "language" : "language",
+        "channel_info" : {
+          "sub_channel_name" : "sub_channel_name",
+          "channel_type" : "INTERNET"
+        }
+      }
+    },
+    "OrderUpdateResponse" : {
+      "type" : "object",
+      "required" : [ "action", "event_id", "inventory_order", "tickets" ],
+      "properties" : {
+        "event_id" : {
+          "type" : "string",
+          "description" : "Parnert event id",
+          "maxLength" : 45
+        },
+        "inventory_order" : {
+          "type" : "string",
+          "description" : "Partner order reference echoed",
+          "maxLength" : 36
+        },
+        "tickets" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/OrderUpdateResponse_tickets"
+          },
+          "minItems" : 1
+        },
+        "action" : {
+          "type" : "string",
+          "description" : "Action echoed.\n\"PRINT\" - to set the status of the tickets to printed.\n\"ROLLBACK_PRINT\" - to reset the status to printable (for printing problems)\n\"CANCEL\" - to cancel the order\n"
+        }
+      },
+      "example" : {
+        "event_id" : "event_id",
+        "tickets" : [ {
+          "ticket" : {
+            "seat" : "seat",
+            "price_type_id" : "price_type_id",
+            "price_level_id" : "price_level_id",
+            "level" : "level",
+            "section" : "section",
+            "row" : "row",
+            "ticket_id" : "ticket_id"
+          },
+          "entry_code" : "entry_code",
+          "print_messages" : [ "print_messages", "print_messages" ],
+          "status" : {
+            "id" : 1,
+            "message" : "message"
+          }
+        }, {
+          "ticket" : {
+            "seat" : "seat",
+            "price_type_id" : "price_type_id",
+            "price_level_id" : "price_level_id",
+            "level" : "level",
+            "section" : "section",
+            "row" : "row",
+            "ticket_id" : "ticket_id"
+          },
+          "entry_code" : "entry_code",
+          "print_messages" : [ "print_messages", "print_messages" ],
+          "status" : {
+            "id" : 1,
+            "message" : "message"
+          }
+        } ],
+        "action" : "action",
+        "inventory_order" : "inventory_order"
+      }
+    },
+    "Event_organization_info" : {
+      "required" : [ "promoter_id", "promoter_name" ],
+      "properties" : {
+        "promoter_id" : {
+          "type" : "string",
+          "description" : "Promoter identifier (tax identification number)",
+          "maxLength" : 45
+        },
+        "promoter_name" : {
+          "type" : "string",
+          "description" : "Promoter name",
+          "maxLength" : 45
+        }
+      },
+      "example" : {
+        "promoter_id" : "promoter_id",
+        "promoter_name" : "promoter_name"
+      }
+    },
+    "Event_genre_info" : {
+      "required" : [ "genre_id", "genre_name" ],
+      "properties" : {
+        "genre_id" : {
+          "type" : "string",
+          "description" : "Event genre identifier",
+          "maxLength" : 45
+        },
+        "genre_name" : {
+          "type" : "string",
+          "description" : "Event genre name",
+          "maxLength" : 45
+        }
+      },
+      "example" : {
+        "genre_name" : "genre_name",
+        "genre_id" : "genre_id"
+      }
+    },
+    "Event_date_time_properties" : {
+      "properties" : {
+        "date_hidden" : {
+          "type" : "boolean",
+          "description" : "True if the event date can't be showed"
+        },
+        "time_hidden" : {
+          "type" : "boolean",
+          "description" : "True if the event time can't be showed"
+        }
+      },
+      "example" : {
+        "time_hidden" : true,
+        "date_hidden" : true
+      }
+    },
+    "Event_visibility_visibility_override" : {
+      "required" : [ "visibility" ],
+      "properties" : {
+        "visibility" : {
+          "type" : "string",
+          "description" : "Visibility of the event in TM sales channels at a specific date/time",
+          "enum" : [ "VISIBLE", "NOT_VISIBLE", "HIDDEN" ]
+        },
+        "starts_on" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "Specific UTC date/time of the visibility change"
+        }
+      },
+      "example" : {
+        "visibility" : "VISIBLE",
+        "starts_on" : "2000-01-23T04:56:07.000+00:00"
+      }
+    },
+    "Event_visibility" : {
+      "required" : [ "default_visibility" ],
+      "properties" : {
+        "default_visibility" : {
+          "type" : "string",
+          "description" : "Visibility of the event in TM sales channels at the event creation",
+          "enum" : [ "VISIBLE", "NOT_VISIBLE", "HIDDEN" ]
+        },
+        "visibility_override" : {
+          "$ref" : "#/definitions/Event_visibility_visibility_override"
+        }
+      },
+      "example" : {
+        "visibility_override" : {
+          "visibility" : "VISIBLE",
+          "starts_on" : "2000-01-23T04:56:07.000+00:00"
+        },
+        "default_visibility" : "VISIBLE"
+      }
+    },
+    "Event_doors_date_time_properties" : {
+      "properties" : {
+        "date_hidden" : {
+          "type" : "boolean",
+          "description" : "True if the doors date can't be showed"
+        },
+        "time_hidden" : {
+          "type" : "boolean",
+          "description" : "True if the doors time can't be showed"
+        }
+      },
+      "example" : {
+        "time_hidden" : true,
+        "date_hidden" : true
+      }
+    },
+    "Event_price_levels" : {
+      "required" : [ "id", "text_infos" ],
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "description" : "Price level identifier",
+          "maxLength" : 45
+        },
+        "text_infos" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/TextInfoPriceLevel"
+          },
+          "minItems" : 1
+        }
+      },
+      "example" : {
+        "id" : "id",
+        "text_infos" : [ {
+          "name" : "name",
+          "description" : "description",
+          "lang" : "lang"
+        }, {
+          "name" : "name",
+          "description" : "description",
+          "lang" : "lang"
+        } ]
+      }
+    },
+    "Event_price_types" : {
+      "required" : [ "id", "regular", "text_infos" ],
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "description" : "Price type identifier",
+          "maxLength" : 45
+        },
+        "regular" : {
+          "type" : "boolean",
+          "description" : "Indicates if this price type is the \"regular\" price. Can have only one price type set to true.",
+          "default" : false
+        },
+        "access_code" : {
+          "type" : "string",
+          "description" : "password to access this price type",
+          "maxLength" : 20
+        },
+        "text_infos" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/TextInfoPriceType"
+          },
+          "minItems" : 1
+        }
+      },
+      "example" : {
+        "access_code" : "access_code",
+        "id" : "id",
+        "text_infos" : [ {
+          "additional_info" : "additional_info",
+          "name" : "name",
+          "description" : "description",
+          "lang" : "lang",
+          "printed_description" : "printed_description"
+        }, {
+          "additional_info" : "additional_info",
+          "name" : "name",
+          "description" : "description",
+          "lang" : "lang",
+          "printed_description" : "printed_description"
+        } ],
+        "regular" : false
+      }
+    },
+    "Event_price_period" : {
+      "required" : [ "end_date_time", "id", "start_date_time" ],
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "description" : "period id",
+          "maxLength" : 45
+        },
+        "start_date_time" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "Exception price start (UTC date and time)"
+        },
+        "end_date_time" : {
+          "type" : "string",
+          "format" : "date-time",
+          "description" : "Exception price end (UTC date and time)"
+        }
+      },
+      "description" : "For a single period, this object will contain the same start/end on-sale dates as the event dates",
+      "example" : {
+        "end_date_time" : "2000-01-23T04:56:07.000+00:00",
+        "id" : "id",
+        "start_date_time" : "2000-01-23T04:56:07.000+00:00"
+      }
+    },
+    "Event_prices" : {
+      "required" : [ "amount", "price_level_id", "price_type_id" ],
+      "properties" : {
+        "price_level_id" : {
+          "type" : "string",
+          "description" : "Price level identifier",
+          "maxLength" : 45
+        },
+        "price_type_id" : {
+          "type" : "string",
+          "description" : "Price type identifier",
+          "maxLength" : 45
+        },
+        "amount" : {
+          "type" : "string",
+          "description" : "Price for these price level and price type (Minor currency units ex. 2000 = 20EUR)",
+          "maxLength" : 12
+        }
+      },
+      "example" : {
+        "price_type_id" : "price_type_id",
+        "amount" : "amount",
+        "price_level_id" : "price_level_id"
+      }
+    },
+    "Event_face_value_prices" : {
+      "required" : [ "price_period", "prices" ],
+      "properties" : {
+        "price_period" : {
+          "$ref" : "#/definitions/Event_price_period"
+        },
+        "prices" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Event_prices"
+          },
+          "minItems" : 1
+        }
+      },
+      "example" : {
+        "price_period" : {
+          "end_date_time" : "2000-01-23T04:56:07.000+00:00",
+          "id" : "id",
+          "start_date_time" : "2000-01-23T04:56:07.000+00:00"
+        },
+        "prices" : [ {
+          "price_type_id" : "price_type_id",
+          "amount" : "amount",
+          "price_level_id" : "price_level_id"
+        }, {
+          "price_type_id" : "price_type_id",
+          "amount" : "amount",
+          "price_level_id" : "price_level_id"
+        } ]
+      }
+    },
+    "GAareaAvailability_quantities" : {
+      "required" : [ "available", "unavailable" ],
+      "properties" : {
+        "available" : {
+          "type" : "integer",
+          "description" : "Number of available seats in the area",
+          "minimum" : 0
+        },
+        "unavailable" : {
+          "type" : "integer",
+          "description" : "Number of unavailable seats in the area",
+          "minimum" : 0
+        }
+      },
+      "description" : "Availability information of the area",
+      "example" : {
+        "unavailable" : 0,
+        "available" : 0
+      }
+    },
+    "RSareaAvailability_seats" : {
+      "required" : [ "available" ],
+      "properties" : {
+        "available" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "description" : "seat label",
+            "maxLength" : 45
+          },
+          "minItems" : 1
+        }
+      },
+      "example" : {
+        "available" : [ "available", "available" ]
+      }
+    },
+    "RSareaAvailability_rows" : {
+      "required" : [ "row", "seats" ],
+      "properties" : {
+        "row" : {
+          "type" : "string",
+          "description" : "row label",
+          "maxLength" : 45
+        },
+        "seats" : {
+          "$ref" : "#/definitions/RSareaAvailability_seats"
+        }
+      },
+      "example" : {
+        "row" : "row",
+        "seats" : {
+          "available" : [ "available", "available" ]
+        }
+      }
+    },
+    "RSarea_seats" : {
+      "required" : [ "position_x", "seat" ],
+      "properties" : {
+        "seat" : {
+          "type" : "string",
+          "description" : "seat label",
+          "maxLength" : 45
+        },
+        "killed" : {
+          "type" : "boolean",
+          "description" : "True if the seat is killed",
+          "default" : false
+        },
+        "free_text" : {
+          "type" : "string",
+          "description" : "Free text to include on the ticket of the seat (overwrite rs_area.free_text)",
+          "maxLength" : 15
+        },
+        "position_x" : {
+          "type" : "integer",
+          "description" : "Indicates the relative x position of this seat in relation to the other seats of the same area (i.e x position in the area's seat matrix).",
+          "minimum" : 1
+        }
+      },
+      "example" : {
+        "seat" : "seat",
+        "position_x" : 1,
+        "free_text" : "free_text",
+        "killed" : false
+      }
+    },
+    "RSarea_rows" : {
+      "required" : [ "position_y", "row", "seats" ],
+      "properties" : {
+        "row" : {
+          "type" : "string",
+          "description" : "row label",
+          "maxLength" : 45
+        },
+        "position_y" : {
+          "type" : "integer",
+          "description" : "Indicates the relative y position of this seat in relation to the other seats of the same area (i.e y position in the area's seat matrix).",
+          "minimum" : 1
+        },
+        "seats" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/RSarea_seats"
+          },
+          "minItems" : 1
+        }
+      },
+      "example" : {
+        "position_y" : 1,
+        "row" : "row",
+        "seats" : [ {
+          "seat" : "seat",
+          "position_x" : 1,
+          "free_text" : "free_text",
+          "killed" : false
+        }, {
+          "seat" : "seat",
+          "position_x" : 1,
+          "free_text" : "free_text",
+          "killed" : false
+        } ]
+      }
+    },
+    "Manifest_sections" : {
+      "required" : [ "id" ],
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "description" : "Section identifier",
+          "maxLength" : 45
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "Section description",
+          "maxLength" : 19
+        }
+      },
+      "example" : {
+        "description" : "description",
+        "id" : "id"
+      }
+    },
+    "Manifest_levels" : {
+      "required" : [ "id" ],
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "description" : "Level identifier",
+          "maxLength" : 45
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "Level description",
+          "maxLength" : 19
+        }
+      },
+      "example" : {
+        "description" : "description",
+        "id" : "id"
+      }
+    },
+    "Manifest_price_levels" : {
+      "required" : [ "id" ],
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "description" : "Price level identifier",
+          "maxLength" : 45
+        }
+      },
+      "example" : {
+        "id" : "id"
+      }
+    },
+    "Search_bestavail_areas" : {
+      "properties" : {
+        "level" : {
+          "type" : "string",
+          "description" : "Level id of the area to search",
+          "maxLength" : 45
+        },
+        "section" : {
+          "type" : "string",
+          "description" : "Section id of the area to search",
+          "maxLength" : 45
+        }
+      },
+      "example" : {
+        "level" : "level",
+        "section" : "section"
+      }
+    },
+    "Search_bestavail_price_types" : {
+      "required" : [ "id", "quantity" ],
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "description" : "Price type id to search",
+          "maxLength" : 45
+        },
+        "quantity" : {
+          "type" : "integer",
+          "format" : "int32",
+          "description" : "Quantity requested for this type price",
+          "minimum" : 1
+        }
+      },
+      "example" : {
+        "quantity" : 1,
+        "id" : "id"
+      }
+    },
+    "Search_bestavail" : {
+      "required" : [ "price_types" ],
+      "properties" : {
+        "areas" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Search_bestavail_areas"
+          }
+        },
+        "price_level_ids" : {
+          "type" : "array",
+          "items" : {
+            "type" : "string",
+            "description" : "Price level ids to search."
+          }
+        },
+        "price_types" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Search_bestavail_price_types"
+          },
+          "minItems" : 1
+        }
+      },
+      "example" : {
+        "price_types" : [ {
+          "quantity" : 1,
+          "id" : "id"
+        }, {
+          "quantity" : 1,
+          "id" : "id"
+        } ],
+        "areas" : [ {
+          "level" : "level",
+          "section" : "section"
+        }, {
+          "level" : "level",
+          "section" : "section"
+        } ],
+        "price_level_ids" : [ "price_level_ids", "price_level_ids" ]
+      }
+    },
+    "Search_specific" : {
+      "required" : [ "tickets" ],
+      "properties" : {
+        "tickets" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/Ticket"
+          },
+          "minItems" : 1
+        }
+      },
+      "example" : {
+        "tickets" : [ {
+          "seat" : "seat",
+          "price_type_id" : "price_type_id",
+          "price_level_id" : "price_level_id",
+          "level" : "level",
+          "section" : "section",
+          "row" : "row"
+        }, {
+          "seat" : "seat",
+          "price_type_id" : "price_type_id",
+          "price_level_id" : "price_level_id",
+          "level" : "level",
+          "section" : "section",
+          "row" : "row"
+        } ]
+      }
+    },
+    "OrderResponse_tickets" : {
+      "required" : [ "price_without_fees", "ticket" ],
+      "properties" : {
+        "ticket" : {
+          "$ref" : "#/definitions/FullTicket"
+        },
+        "price_without_fees" : {
+          "type" : "string",
+          "description" : "Price without fees (mandatory for order response)",
+          "maxLength" : 12
+        }
+      },
+      "example" : {
+        "ticket" : {
+          "seat" : "seat",
+          "price_type_id" : "price_type_id",
+          "price_level_id" : "price_level_id",
+          "level" : "level",
+          "section" : "section",
+          "row" : "row",
+          "ticket_id" : "ticket_id"
+        },
+        "price_without_fees" : "price_without_fees"
+      }
+    },
+    "OrderStatus_tickets" : {
+      "required" : [ "cancellable", "cancelled", "printable", "printed", "ticket" ],
+      "properties" : {
+        "ticket" : {
+          "$ref" : "#/definitions/FullTicket"
+        },
+        "printable" : {
+          "type" : "boolean",
+          "description" : "Ticket is printable."
+        },
+        "printed" : {
+          "type" : "boolean",
+          "description" : "Ticket was printed."
+        },
+        "cancellable" : {
+          "type" : "boolean",
+          "description" : "Ticket is cancellable."
+        },
+        "cancelled" : {
+          "type" : "boolean",
+          "description" : "Ticket was cancelled."
+        }
+      },
+      "example" : {
+        "printed" : true,
+        "ticket" : {
+          "seat" : "seat",
+          "price_type_id" : "price_type_id",
+          "price_level_id" : "price_level_id",
+          "level" : "level",
+          "section" : "section",
+          "row" : "row",
+          "ticket_id" : "ticket_id"
+        },
+        "cancelled" : true,
+        "printable" : true,
+        "cancellable" : true
+      }
+    },
+    "OrderUpdateResponse_tickets" : {
+      "required" : [ "status", "ticket" ],
+      "properties" : {
+        "ticket" : {
+          "$ref" : "#/definitions/FullTicket"
+        },
+        "status" : {
+          "$ref" : "#/definitions/StatusResponse"
+        },
+        "entry_code" : {
+          "type" : "string",
+          "description" : "Ticket barcode. Required for \"PRINT\" or \"ROLLBACK_PRINT\".",
+          "maxLength" : 45
+        },
+        "print_messages" : {
+          "type" : "array",
+          "description" : "Extra info to print on the ticket",
+          "items" : {
+            "type" : "string",
+            "maxLength" : 100
+          }
+        }
+      },
+      "example" : {
+        "ticket" : {
+          "seat" : "seat",
+          "price_type_id" : "price_type_id",
+          "price_level_id" : "price_level_id",
+          "level" : "level",
+          "section" : "section",
+          "row" : "row",
+          "ticket_id" : "ticket_id"
+        },
+        "entry_code" : "entry_code",
+        "print_messages" : [ "print_messages", "print_messages" ],
+        "status" : {
+          "id" : 1,
+          "message" : "message"
+        }
+      }
+    }
+  }
+}
