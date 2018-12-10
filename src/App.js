@@ -1,14 +1,21 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+// import './App.css';
 
-import Swagger from './components/Swagger';
+// import Swagger from './components/Swagger';
+// import CustomSwagger from './components/MySwagger';
 
 class App extends Component {
+  clickHandler() {
+    console.log('click')
+  }
+
   render() {
     return (
       <div className="App">
-        <Swagger />
+        {/*<CustomSwagger/>*/}
+        {/*<Swagger />*/}
+        <h3>hello from app component</h3>
+        <button onClick={this.clickHandler}>Click me</button>
       </div>
     );
   }
